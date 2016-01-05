@@ -11,6 +11,7 @@ export class Shader
 {
 
 	static COLOR_NULL:Vec3f = new Vec3f(0);
+	static COLOR_RED:Vec3f = new Vec3f(1,0,0);
 
 	constructor()
 	{

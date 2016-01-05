@@ -4,6 +4,7 @@ import {Shader} from "../shader/Shader";
 import {Plane} from "../util/math/Plane";
 import {Sphere} from "../util/math/Sphere";
 import {Camera} from "../gfx/Camera";
+import {Material} from "../gfx/Material";
 
 export class RayWorker
 {
@@ -45,13 +46,15 @@ export class RayWorker
 
                 self.tracer = e.data.tracer;
 
+                self.tracer.camera = Camera.cast(self.tracer.camera);
+
                 self.tracer.scene.objects.forEach(function(obj:TracerObject){
                     obj.primitives.forEach(function(primitive:Primitive, index:number){
                         primitive = primitive.type == "plane"?Plane.cast(primitive):Sphere.cast(primitive);
                         obj.primitives[index] = primitive;
                     });
+                    obj.material = Material.cast(obj.material);
                 });
-                self.tracer.camera = Camera.cast(self.tracer.camera);
                 self.tracer.scene.lights.forEach(function(light:Light, index){
                     self.tracer.scene.lights[index] = Light.cast(light);
                 });
@@ -69,6 +72,8 @@ export class RayWorker
             }else if(self.command == RayWorker.TRACE){
                 self.command = null;
                 self.ar = e.data.ar;
+                self.tracer.camera.rot.set(e.data.rot);
+                self.tracer.camera.pos.set(e.data.pos);
                 self.run();
                 postMessage(RayWorker.TRACED);
             }
@@ -91,18 +96,19 @@ export class RayWorker
         //console.log("Traced");
         if (this.tracer != null)
         {
-            var width:number = this.window_width;
-            var height:number = this.window_height;
             var ray_primary:Ray = new Ray();
+            //var ray_primary:Ray = new Ray(new Vec3f(0,1,0), new Vec3f(-0.39594, 0.22271, -0.89086), 1);
             for (var y:number = this.yoffset; y < this.yoffset + this.height; y++)
             {
                 for (var x:number = this.xoffset; x < this.xoffset + this.width; x++)
                 {
-                    ray_primary = Ray.calcCameraRay(this.tracer.camera, width, height, this.ar, x, y);
+                    ray_primary = Ray.calcCameraRay(this.tracer.camera, this.window_width, this.window_height, this.ar, x, y);
+                    //ray_primary = new Ray();
 
                     this.drawPixelVec3f(x, y, RayWorker.traceColor(ray_primary, this.tracer.scene, 0));
+                    //this.drawPixelInt(x, y, Math.random() * 0xffffff);
 
-                    if (Config.debug && x == this.xoffset + 1 || Config.debug && y == this.yoffset) {
+                    if (Config.debug && x == this.xoffset || Config.debug && y == this.yoffset) {
                         this.drawPixelInt(x, y, 0xFFFF00F);
                     }
                 }
@@ -113,13 +119,12 @@ export class RayWorker
 
     drawPixelVec3f(x:number, y:number, color:Vec3f):void{
 
-        if (x < 0 || x > this.width || y < 0 || y > this.height)
-            return;
+        /*if (x < 0 || x > this.width || y < 0 || y > this.height)
+            return;*/
 
         color = <Vec3f>MathUtils.smoothstep(MathUtils.clamp(color, 0.0, 1.0), 0.0, 1.0);
 
-        //var index:number = x + y * this.width;
-        var index:number = ((y * (this.width * 4)) + (x * 4));
+        var index:number = ((y * (this.window_width * 4)) + (x * 4));
         var red:number = (color.x * 255.0);
         var green:number = (color.y * 255.0);
         var blue:number = (color.z * 255.0);
@@ -132,11 +137,11 @@ export class RayWorker
     }
 
     drawPixelInt(x:number, y:number, color:number) {
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height)
-            return;
+        /*if (x < 0 || x >= this.width || y < 0 || y >= this.height)
+            return;*/
 
         //this.pixels[x + y * this.width] = color;
-        var index:number = ((y * (this.width * 4)) + (x * 4));
+        var index:number = ((y * (this.window_width * 4)) + (x * 4));
 
         var red = (color >> 16) & 255;
         var green = (color >> 8) & 255;
@@ -175,7 +180,7 @@ export class RayWorker
 
         // Return a blank color if the ray didn't hit anything
         if (xFinal == null)
-            return Shader.COLOR_NULL;
+            return Shader.COLOR_RED;
 
         // Initialize the main color which will be calculated and returned
         var cFinal:Vec3f = new Vec3f();

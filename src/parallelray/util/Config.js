@@ -24,13 +24,13 @@ System.register([], function(exports_1) {
                 Config.load = function () {
                 };
                 Config.RES_ROOT = "./res/";
-                Config.window_width = 512;
-                Config.window_height = 512;
+                Config.window_width = 1280;
+                Config.window_height = 720;
                 Config.display_scale = 1;
                 Config.recursion_max = 3;
                 Config.thread_amount = -1;
                 Config.epsilon = 1e-3;
-                Config.debug = true;
+                Config.debug = false;
                 return Config;
             })();
             exports_1("Config", Config);

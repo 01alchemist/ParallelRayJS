@@ -1,7 +1,11 @@
-System.register([], function(exports_1) {
+System.register(["../util/math/Vec3f"], function(exports_1) {
+    var Vec3f_1;
     var Material;
     return {
-        setters:[],
+        setters:[
+            function (Vec3f_1_1) {
+                Vec3f_1 = Vec3f_1_1;
+            }],
         execute: function() {
             Material = (function () {
                 function Material() {
@@ -38,6 +42,21 @@ System.register([], function(exports_1) {
                 };
                 Material.prototype.getIOR = function () {
                     return this.ior;
+                };
+                Material.cast = function (obj) {
+                    var mat = new Material();
+                    mat.material_type = obj.material_type;
+                    mat.color_ambient = obj.color_ambient ? new Vec3f_1.Vec3f().set(obj.color_ambient) : new Vec3f_1.Vec3f(1);
+                    mat.color_diffuse = obj.color_diffuse ? new Vec3f_1.Vec3f().set(obj.color_diffuse) : new Vec3f_1.Vec3f(1);
+                    mat.color_specular = obj.color_specular ? new Vec3f_1.Vec3f().set(obj.color_specular) : new Vec3f_1.Vec3f(0);
+                    mat.reflectivity = obj.reflectivity;
+                    mat.refractivity = obj.refractivity;
+                    mat.ior = obj.ior;
+                    mat.shininess = obj.shininess;
+                    mat.roughness = obj.roughness;
+                    mat.fresnel = obj.fresnel;
+                    mat.density = obj.density;
+                    return mat;
                 };
                 return Material;
             })();

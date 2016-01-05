@@ -15,6 +15,8 @@ export class Ray
         this.ior = ior || 1.0;
 	}
 
+    static interval=0;
+
 	static calcCameraRay(camera:Camera, w:number, h:number, ar:number, x:number, y:number):Ray
 	{
 		let x_norm:number = (x - w * 0.5) / w * ar;
@@ -27,6 +29,10 @@ export class Ray
 		let image_point:Vec3f = right.scale(x_norm).add(up.scale(y_norm)).add(camera.getPos().add(forward));
 		let ray_direction:Vec3f = image_point.sub(camera.getPos());
 
+		if(Ray.interval % 500000 == 0){
+            //console.log(forward);
+        }
+        Ray.interval++;
 		return new Ray(camera.getPos(), ray_direction);
 	}
 

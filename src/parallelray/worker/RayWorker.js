@@ -1,5 +1,5 @@
-System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math/Plane", "../util/math/Sphere", "../gfx/Camera"], function(exports_1) {
-    var gfx_1, util_1, Shader_1, Plane_1, Sphere_1, Camera_1;
+System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math/Plane", "../util/math/Sphere", "../gfx/Camera", "../gfx/Material"], function(exports_1) {
+    var gfx_1, util_1, Shader_1, Plane_1, Sphere_1, Camera_1, Material_1;
     var RayWorker;
     return {
         setters:[
@@ -20,6 +20,9 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
             },
             function (Camera_1_1) {
                 Camera_1 = Camera_1_1;
+            },
+            function (Material_1_1) {
+                Material_1 = Material_1_1;
             }],
         execute: function() {
             RayWorker = (function () {
@@ -34,13 +37,14 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                             self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
                             postMessage(RayWorker.INITED);
                             self.tracer = e.data.tracer;
+                            self.tracer.camera = Camera_1.Camera.cast(self.tracer.camera);
                             self.tracer.scene.objects.forEach(function (obj) {
                                 obj.primitives.forEach(function (primitive, index) {
                                     primitive = primitive.type == "plane" ? Plane_1.Plane.cast(primitive) : Sphere_1.Sphere.cast(primitive);
                                     obj.primitives[index] = primitive;
                                 });
+                                obj.material = Material_1.Material.cast(obj.material);
                             });
-                            self.tracer.camera = Camera_1.Camera.cast(self.tracer.camera);
                             self.tracer.scene.lights.forEach(function (light, index) {
                                 self.tracer.scene.lights[index] = gfx_1.Light.cast(light);
                             });
@@ -51,6 +55,8 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                         else if (self.command == RayWorker.TRACE) {
                             self.command = null;
                             self.ar = e.data.ar;
+                            self.tracer.camera.rot.set(e.data.rot);
+                            self.tracer.camera.pos.set(e.data.pos);
                             self.run();
                             postMessage(RayWorker.TRACED);
                         }
@@ -67,14 +73,12 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                 RayWorker.prototype.run = function () {
                     this.finished = false;
                     if (this.tracer != null) {
-                        var width = this.window_width;
-                        var height = this.window_height;
                         var ray_primary = new util_1.Ray();
                         for (var y = this.yoffset; y < this.yoffset + this.height; y++) {
                             for (var x = this.xoffset; x < this.xoffset + this.width; x++) {
-                                ray_primary = util_1.Ray.calcCameraRay(this.tracer.camera, width, height, this.ar, x, y);
+                                ray_primary = util_1.Ray.calcCameraRay(this.tracer.camera, this.window_width, this.window_height, this.ar, x, y);
                                 this.drawPixelVec3f(x, y, RayWorker.traceColor(ray_primary, this.tracer.scene, 0));
-                                if (util_1.Config.debug && x == this.xoffset + 1 || util_1.Config.debug && y == this.yoffset) {
+                                if (util_1.Config.debug && x == this.xoffset || util_1.Config.debug && y == this.yoffset) {
                                     this.drawPixelInt(x, y, 0xFFFF00F);
                                 }
                             }
@@ -83,10 +87,8 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                     this.finished = true;
                 };
                 RayWorker.prototype.drawPixelVec3f = function (x, y, color) {
-                    if (x < 0 || x > this.width || y < 0 || y > this.height)
-                        return;
                     color = util_1.MathUtils.smoothstep(util_1.MathUtils.clamp(color, 0.0, 1.0), 0.0, 1.0);
-                    var index = ((y * (this.width * 4)) + (x * 4));
+                    var index = ((y * (this.window_width * 4)) + (x * 4));
                     var red = (color.x * 255.0);
                     var green = (color.y * 255.0);
                     var blue = (color.z * 255.0);
@@ -96,9 +98,7 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                     this.pixelMemory[index + 3] = 255;
                 };
                 RayWorker.prototype.drawPixelInt = function (x, y, color) {
-                    if (x < 0 || x >= this.width || y < 0 || y >= this.height)
-                        return;
-                    var index = ((y * (this.width * 4)) + (x * 4));
+                    var index = ((y * (this.window_width * 4)) + (x * 4));
                     var red = (color >> 16) & 255;
                     var green = (color >> 8) & 255;
                     var blue = color & 255;
@@ -125,7 +125,7 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                         });
                     });
                     if (xFinal == null)
-                        return Shader_1.Shader.COLOR_NULL;
+                        return Shader_1.Shader.COLOR_RED;
                     var cFinal = new util_1.Vec3f();
                     scene.lights.forEach(function (light) {
                         cFinal.set(cFinal.add(Shader_1.Shader.main(ray, xFinal, light, xObject.material)));

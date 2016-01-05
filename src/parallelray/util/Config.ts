@@ -15,13 +15,13 @@ export class Config
 
 	static RES_ROOT:string = "./res/";
 
-	static window_width:number = 512;
-	static window_height:number = 512;
+	static window_width:number = 1280;
+	static window_height:number = 720;
 	static display_scale:number = 1;
 	static recursion_max:number = 3;
 	static thread_amount:number = -1;
     static epsilon:number = 1e-3;
-	static debug:boolean = true;
+	static debug:boolean = false;
 
     constructor(){
 

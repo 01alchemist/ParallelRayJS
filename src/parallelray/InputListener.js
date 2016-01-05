@@ -5,14 +5,20 @@ System.register([], function(exports_1) {
         execute: function() {
             InputListener = (function () {
                 function InputListener() {
+                    window.onkeydown = function (event) {
+                        InputListener.keyPressed(event);
+                    };
+                    window.onkeyup = function (event) {
+                        InputListener.keyReleased(event);
+                    };
                 }
                 InputListener.keyTyped = function (e) {
                 };
                 InputListener.keyPressed = function (e) {
-                    InputListener.keyboard_keys[e.getKeyCode()] = true;
+                    InputListener.keyboard_keys[e.keyCode] = true;
                 };
                 InputListener.keyReleased = function (e) {
-                    InputListener.keyboard_keys[e.getKeyCode()] = false;
+                    InputListener.keyboard_keys[e.keyCode] = false;
                 };
                 InputListener.mouseClicked = function (e) {
                 };

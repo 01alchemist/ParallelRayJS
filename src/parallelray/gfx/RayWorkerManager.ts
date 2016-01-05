@@ -8,13 +8,13 @@ import {RayWorker} from "../worker/RayWorker";
  * Created by r3f on 4/1/2016.
  */
 
-export interface SharedArrayBuffer extends ArrayBuffer{
+export interface SharedArrayBuffer extends ArrayBuffer {
 
 }
 
 //export var SharedArrayBuffer = SharedArrayBuffer || ArrayBuffer;
 
-export class RayWorkerManager{
+export class RayWorkerManager {
 
     private propertySize:number = 512;
     private propertyMemory:Uint8Array;
@@ -23,29 +23,34 @@ export class RayWorkerManager{
 
     private jobs:Array<RayJob>;
 
-    constructor(private tracer:Tracer){
+    constructor(private tracer:Tracer) {
 
         var width:number = Config.window_width;
         var height:number = Config.window_height;
         this.propertyMemory = new Uint8Array(new SharedArrayBuffer(this.propertySize));
-        this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer( width * height * 4));
+        this.pixelMemory = new Uint8Array(new SharedArrayBuffer(width * height * 4));
 
         this.jobs = [];
 
         this.setWorkerAmount(Config.thread_amount);
     }
-    get numWorkers():number{
+
+    get numWorkers():number {
         return this.jobs.length;
     }
-    get pixels():Uint8Array{
+
+    get pixels():Uint8Array {
         return this.pixelMemory;
     }
+
     setWorkerAmount(n:number):void {
         if (n <= 0) {
             n = navigator["hardwareConcurrency"] || 2;
         }
 
-        n = n > 2?2:n;
+        n = n > 2 ? 2 : n;
+
+        n = 4;
 
         console.info("hardwareConcurrency:" + n);
 
@@ -80,13 +85,11 @@ export class RayWorkerManager{
     }
 
     render():void {
-        if (this.workersFinished()) {
-            //console.log("render");
-            this.jobs.forEach(function (w:RayJob) {
-                w.run();
-            });
-        }
+        this.jobs.forEach(function (w:RayJob) {
+            w.run();
+        });
     }
+
     workersFinished():boolean {
         var isAllFinished:boolean = true;
         this.jobs.forEach(function (w:RayJob) {

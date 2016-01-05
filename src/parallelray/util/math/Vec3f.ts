@@ -6,9 +6,9 @@ export class Vec3f {
     z:number;
 
     constructor(x?:number, y?:number, z?:number) {
-        x = x || 0;
-        y = y || x;
-        z = z || x;
+        x = x == undefined ? 0 : x;
+        y = y == undefined ? x : y;
+        z = z == undefined ? x : z;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -32,7 +32,7 @@ export class Vec3f {
             this.x = v.x;
             this.y = v.y;
             this.z = v.z;
-        }else{
+        } else {
             this.x = <number>x;
             this.y = y;
             this.z = z;

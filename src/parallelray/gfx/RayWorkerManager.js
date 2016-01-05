@@ -17,7 +17,7 @@ System.register(["../util/Config", "./RayJob"], function(exports_1) {
                     var width = Config_1.Config.window_width;
                     var height = Config_1.Config.window_height;
                     this.propertyMemory = new Uint8Array(new SharedArrayBuffer(this.propertySize));
-                    this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 4));
+                    this.pixelMemory = new Uint8Array(new SharedArrayBuffer(width * height * 4));
                     this.jobs = [];
                     this.setWorkerAmount(Config_1.Config.thread_amount);
                 }
@@ -40,6 +40,7 @@ System.register(["../util/Config", "./RayJob"], function(exports_1) {
                         n = navigator["hardwareConcurrency"] || 2;
                     }
                     n = n > 2 ? 2 : n;
+                    n = 4;
                     console.info("hardwareConcurrency:" + n);
                     this.jobs = [];
                     var width = Config_1.Config.window_width;
@@ -64,11 +65,9 @@ System.register(["../util/Config", "./RayJob"], function(exports_1) {
                     });
                 };
                 RayWorkerManager.prototype.render = function () {
-                    if (this.workersFinished()) {
-                        this.jobs.forEach(function (w) {
-                            w.run();
-                        });
-                    }
+                    this.jobs.forEach(function (w) {
+                        w.run();
+                    });
                 };
                 RayWorkerManager.prototype.workersFinished = function () {
                     var isAllFinished = true;

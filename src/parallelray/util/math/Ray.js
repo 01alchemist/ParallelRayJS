@@ -21,6 +21,9 @@ System.register(["./Vec3f"], function(exports_1) {
                     var right = camera.getRight();
                     var image_point = right.scale(x_norm).add(up.scale(y_norm)).add(camera.getPos().add(forward));
                     var ray_direction = image_point.sub(camera.getPos());
+                    if (Ray.interval % 500000 == 0) {
+                    }
+                    Ray.interval++;
                     return new Ray(camera.getPos(), ray_direction);
                 };
                 Ray.prototype.getPos = function () {
@@ -41,6 +44,7 @@ System.register(["./Vec3f"], function(exports_1) {
                 Ray.prototype.setIOR = function (ior) {
                     this.ior = ior;
                 };
+                Ray.interval = 0;
                 return Ray;
             })();
             exports_1("Ray", Ray);

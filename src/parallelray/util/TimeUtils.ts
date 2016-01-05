@@ -5,11 +5,11 @@ export class TimeUtils
 	static frame:number   = 1000;
 	static timeres:number = 1;
 
-	static currentTime:number;
-	static lastTime:number;
-	static time:number;
-	static delta:number;
-	static fps:number;
+	static currentTime:number=0;
+	static lastTime:number=0;
+	static time:number=0;
+	static delta:number=1;
+	static fps:number=0;
 
 	static init():void
 	{
@@ -19,9 +19,11 @@ export class TimeUtils
 
 	static updateDelta():void
 	{
-		TimeUtils.currentTime = TimeUtils.getTime();
-		TimeUtils.delta = TimeUtils.delta * 0.9 + (TimeUtils.currentTime - TimeUtils.lastTime) * 0.1;
-		TimeUtils.lastTime = TimeUtils.currentTime;
+        TimeUtils.currentTime = TimeUtils.getTime();
+        if(TimeUtils.currentTime - TimeUtils.lastTime != 0){
+			TimeUtils.delta = TimeUtils.delta * 0.9 + (TimeUtils.currentTime - TimeUtils.lastTime) * 0.1;
+			TimeUtils.lastTime = TimeUtils.currentTime;
+		}
 	}
 
 	static updateFPS():void
@@ -33,24 +35,24 @@ export class TimeUtils
 			if (isFinite(TimeUtils.fps)){
 				TimeUtils.fps = 0.0;
 			}
-            TimeUtils.fps = TimeUtils.fps * 0.9 + (TimeUtils.timeres / TimeUtils.delta) * 0.1;
+            TimeUtils.fps = (TimeUtils.fps * 0.9 + (TimeUtils.timeres / TimeUtils.delta) * 0.1);
             TimeUtils.time -= TimeUtils.timeres;
 		}
 	}
 
 	static getTime():number
 	{
-		return performance.now() / TimeUtils.second;
+		return performance.now();
 	}
 
-	static getDelta():number
+	static getDelta():string
 	{
-		return TimeUtils.delta;
+		return TimeUtils.delta.toFixed(2);
 	}
 
-	static getFPS():number
+	static getFPS():string
 	{
-		return TimeUtils.frame * TimeUtils.fps;
+		return (TimeUtils.frame * TimeUtils.fps).toFixed(2);
 	}
 
 }

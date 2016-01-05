@@ -9,10 +9,10 @@ export class Quaternion {
     z:number;
 
     constructor(w?:number, x?:number, y?:number, z?:number) {
-        this.w = w || 0;
-        this.x = x || 0;
-        this.y = y || 0;
-        this.z = z || 0;
+        this.w = w == undefined?0:w;
+        this.x = x == undefined?0:x;
+        this.y = y == undefined?0:y;
+        this.z = z == undefined?0:z;
     }
 
     set(w:Quaternion|number, x?:number, y?:number, z?:number):Quaternion {
@@ -34,7 +34,12 @@ export class Quaternion {
     }
 
     private _isThis(value:any):boolean{
-        return value instanceof Object || value instanceof Quaternion;
+        if(value instanceof Object || value instanceof Quaternion){
+            if(value.w != undefined && value.x != undefined && value.y != undefined&& value.z != undefined){
+                return true;
+            }
+        }
+        return false;
     }
 
     toString():string {

@@ -18,6 +18,7 @@ System.register(["../util/util", "../shader/Shader", "../cpu/Thread", "../worker
         execute: function() {
             RayJob = (function () {
                 function RayJob(pixelMemory, width, height, xoffset, yoffset, id, tracer) {
+                    this.interval = 0;
                     this.pixelMemory = pixelMemory;
                     this.width = width;
                     this.height = height;
@@ -26,10 +27,12 @@ System.register(["../util/util", "../shader/Shader", "../cpu/Thread", "../worker
                     this.id = id;
                     this.finished = true;
                     this.tracer = tracer;
+                    var self = this;
                     this.thread = new Thread_1.Thread("Worker: " + id);
                     this.thread.onInitComplete = function () {
                     };
                     this.thread.onTraceComplete = function () {
+                        self.finished = true;
                     };
                     this.thread.sendCommand(RayWorker_1.RayWorker.INIT);
                     this.thread.sendData({
@@ -47,9 +50,10 @@ System.register(["../util/util", "../shader/Shader", "../cpu/Thread", "../worker
                     this.finished = false;
                     if (this.thread.initialized && !this.thread.isTracing) {
                         this.thread.trace();
-                        this.thread.sendData({ ar: this.display.getAR() });
+                        this.thread.sendData({ ar: this.display.getAR(), rot: this.tracer.camera.rot, pos: this.tracer.camera.pos });
+                        if (this.interval % 500000 == 0) {
+                        }
                     }
-                    this.finished = true;
                 };
                 RayJob.traceColor = function (ray, scene, n) {
                     if (n > util_1.Config.recursion_max)

@@ -95,8 +95,16 @@ export class Camera
 	}
 
 	static cast(obj):Camera{
-		var cam = new Camera(new Vec3f().set(obj.pos), obj.speed, obj.sensitivity);
-        cam.rot = new Quaternion().set(obj.rot);
+		var cam = new Camera(new Vec3f(), obj.speed, obj.sensitivity);
+        cam.pos.x = obj.pos.x;
+        cam.pos.y = obj.pos.y;
+        cam.pos.z = obj.pos.z;
+        cam.rot = new Quaternion(
+			obj.rot.w,
+			obj.rot.x,
+			obj.rot.y,
+			obj.rot.z
+		);
         return cam;
 	}
 

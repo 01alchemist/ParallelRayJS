@@ -92,6 +92,7 @@ System.register(["../util/math/Vec3f", "../util/Config"], function(exports_1) {
                     return C.divide(A);
                 };
                 Shader.COLOR_NULL = new Vec3f_1.Vec3f(0);
+                Shader.COLOR_RED = new Vec3f_1.Vec3f(1, 0, 0);
                 return Shader;
             })();
             exports_1("Shader", Shader);

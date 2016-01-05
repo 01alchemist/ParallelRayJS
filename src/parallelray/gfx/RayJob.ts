@@ -29,13 +29,14 @@ export class RayJob {
         this.id = id;
         this.finished = true;
         this.tracer = tracer;
+        var self = this;
 
         this.thread = new Thread("Worker: " + id);
         this.thread.onInitComplete = function(){
 
         };
         this.thread.onTraceComplete = function(){
-
+            self.finished = true;
         };
         this.thread.sendCommand(RayWorker.INIT);
         this.thread.sendData({
@@ -50,13 +51,20 @@ export class RayJob {
         },[pixelMemory.buffer]);
     }
 
+    interval=0;
+
     run():void {
         this.finished = false;
 
         //console.log("i am running...");
         if(this.thread.initialized && !this.thread.isTracing){
             this.thread.trace();
-            this.thread.sendData({ar: this.display.getAR()});
+            this.thread.sendData({ar: this.display.getAR(), rot:this.tracer.camera.rot, pos:this.tracer.camera.pos});
+
+            if(this.interval % 500000 == 0){
+                //console.log(this.tracer.camera.getRight());
+                //Ray.calcCameraRay(this.tracer.camera, Config.window_width, Config.window_height, this.display.getAR(), 0, 0);
+            }
         }
 
 
@@ -76,7 +84,6 @@ export class RayJob {
          }
          }
          }*/
-        this.finished = true;
     }
 
     static traceColor(ray:Ray, scene:Scene, n:number):Vec3f {

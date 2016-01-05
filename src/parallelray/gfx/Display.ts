@@ -1,5 +1,6 @@
 import {Vec3f} from "../util/math/Vec3f";
 import {MathUtils} from "../util/math/MathUtils";
+import {Config} from "../util/Config";
 export class Display {
 
     static serialVersionUID:number = 1;
@@ -24,48 +25,39 @@ export class Display {
     }
 
     public create():void {
-        // Create the bitmap
+
+        this.info = document.getElementById("info");
+        this.canvas = document.getElementById("viewport");
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.ctx = this.canvas.getContext("2d");
+
         if (this.image == null) {
-            //this.image = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
-            //this.pixels = this.image.getRaster().getDataBuffer().getData();
             this.image = new ImageData(this.width, this.height);
             this.pixels = this.image.data;
             this.clear();
         }
 
-        // Create the jframe
-        //if (this.jframe == null)
-        //{
-        /*this.dimension = new Dimension(this.width * this.scale, this.height * this.scale);
-         this.setPreferredSize(this.dimension);
-         this.jframe = new JFrame();
-         this.jframe.setResizable(false);
-         this.jframe.setTitle(title);
-         this.jframe.add(this);
-         this.jframe.pack();
-         this.jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-         this.jframe.setLocationRelativeTo(null);
-         this.jframe.setVisible(true);*/
-        //}
-
-        this.info = document.getElementById("info");
-        this.canvas = document.getElementById("viewport");
-        this.ctx = this.canvas.getContext("2d");
-        this.ctx.putImageData(this.image,0,0);
-
-        // Create a buffer strategy using triplebuffering
-        if (this.bufferstrategy == null) {
-            //this.createBufferStrategy(3);
-            //this.bufferstrategy = this.getBufferStrategy();
-        }
+        this.ctx.putImageData(this.image, 0, 0);
     }
 
     public render(_pixels):void {
-        this.image = new ImageData(this.width, this.height);
-        this.image.data.buffer = _pixels.buffer;
-        this.ctx.putImageData(this.image,0,0);
-        this.ctx.fillStyle = 'rgba(255,0.9411764705882353,0.0588235294117647,1)';
-        this.ctx.fillRect(Math.random() * 100,Math.random() * 100,50,50);
+
+        //var proxy = this.image.data;
+
+        for (var y = 0; y < this.image.height; y++) {
+            for (var x = 0; x < this.image.width; x++) {
+                var index = ((y * (this.image.width * 4)) + (x * 4));
+                this.pixels[index] = _pixels[index];
+                this.pixels[index + 1] = _pixels[index + 1];
+                this.pixels[index + 2] = _pixels[index + 2];
+                this.pixels[index + 3] = 255;
+            }
+        }
+
+        this.ctx.putImageData(this.image, 0, 0);
+        /*this.ctx.fillStyle = 'rgba(255,0,0,255)';
+         this.ctx.fillRect(Math.random() * 100,Math.random() * 100,50,50);*/
     }
 
     clear() {

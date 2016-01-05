@@ -15,24 +15,29 @@ System.register(["../util/math/MathUtils"], function(exports_1) {
                     this.scale = scale;
                 }
                 Display.prototype.create = function () {
+                    this.info = document.getElementById("info");
+                    this.canvas = document.getElementById("viewport");
+                    this.canvas.width = this.width;
+                    this.canvas.height = this.height;
+                    this.ctx = this.canvas.getContext("2d");
                     if (this.image == null) {
                         this.image = new ImageData(this.width, this.height);
                         this.pixels = this.image.data;
                         this.clear();
                     }
-                    this.info = document.getElementById("info");
-                    this.canvas = document.getElementById("viewport");
-                    this.ctx = this.canvas.getContext("2d");
                     this.ctx.putImageData(this.image, 0, 0);
-                    if (this.bufferstrategy == null) {
-                    }
                 };
                 Display.prototype.render = function (_pixels) {
-                    this.image = new ImageData(this.width, this.height);
-                    this.image.data.buffer = _pixels.buffer;
+                    for (var y = 0; y < this.image.height; y++) {
+                        for (var x = 0; x < this.image.width; x++) {
+                            var index = ((y * (this.image.width * 4)) + (x * 4));
+                            this.pixels[index] = _pixels[index];
+                            this.pixels[index + 1] = _pixels[index + 1];
+                            this.pixels[index + 2] = _pixels[index + 2];
+                            this.pixels[index + 3] = 255;
+                        }
+                    }
                     this.ctx.putImageData(this.image, 0, 0);
-                    this.ctx.fillStyle = 'rgba(255,0.9411764705882353,0.0588235294117647,1)';
-                    this.ctx.fillRect(Math.random() * 100, Math.random() * 100, 50, 50);
                 };
                 Display.prototype.clear = function () {
                 };

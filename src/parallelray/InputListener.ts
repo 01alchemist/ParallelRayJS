@@ -29,6 +29,14 @@ export class InputListener
 	static KEY_PLUS:number          = 107;
 	static KEY_MINUS:number         = 109;
 
+	constructor(){
+        window.onkeydown = function(event){
+            InputListener.keyPressed(event);
+        };
+        window.onkeyup = function(event){
+            InputListener.keyReleased(event);
+        };
+    }
 
     static keyTyped(e):void
 	{
@@ -37,12 +45,12 @@ export class InputListener
 
     static keyPressed(e):void
 	{
-		InputListener.keyboard_keys[e.getKeyCode()] = true;
+		InputListener.keyboard_keys[e.keyCode] = true;
 	}
 
     static keyReleased(e):void
 	{
-		InputListener.keyboard_keys[e.getKeyCode()] = false;
+		InputListener.keyboard_keys[e.keyCode] = false;
 	}
 
     static mouseClicked(e):void

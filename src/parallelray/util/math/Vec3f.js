@@ -5,9 +5,9 @@ System.register([], function(exports_1) {
         execute: function() {
             Vec3f = (function () {
                 function Vec3f(x, y, z) {
-                    x = x || 0;
-                    y = y || x;
-                    z = z || x;
+                    x = x == undefined ? 0 : x;
+                    y = y == undefined ? x : y;
+                    z = z == undefined ? x : z;
                     this.x = x;
                     this.y = y;
                     this.z = z;

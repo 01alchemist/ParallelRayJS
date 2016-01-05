@@ -75,8 +75,11 @@ System.register(["../InputListener", "../util/math/Vec3f", "../util/math/Quatern
                     return this.rot.getUpVector();
                 };
                 Camera.cast = function (obj) {
-                    var cam = new Camera(new Vec3f_1.Vec3f().set(obj.pos), obj.speed, obj.sensitivity);
-                    cam.rot = new Quaternion_1.Quaternion().set(obj.rot);
+                    var cam = new Camera(new Vec3f_1.Vec3f(), obj.speed, obj.sensitivity);
+                    cam.pos.x = obj.pos.x;
+                    cam.pos.y = obj.pos.y;
+                    cam.pos.z = obj.pos.z;
+                    cam.rot = new Quaternion_1.Quaternion(obj.rot.w, obj.rot.x, obj.rot.y, obj.rot.z);
                     return cam;
                 };
                 return Camera;
