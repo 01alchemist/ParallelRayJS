@@ -29,11 +29,11 @@ System.register(["../util/util", "../shader/Shader", "../cpu/Thread", "../worker
                     this.thread = new Thread_1.Thread("Worker: " + id);
                     this.thread.onInitComplete = function () {
                     };
-                    this.thread.onTraceComplete = function () {
+                    this.thread.onTraceComplete = function (buffer) {
+                        pixelMemory.buffer = buffer;
                     };
                     this.thread.sendCommand(RayWorker_1.RayWorker.INIT);
                     this.thread.sendData({
-                        pixelMemory: pixelMemory.buffer,
                         window_width: util_1.Config.window_width,
                         window_height: util_1.Config.window_height,
                         width: width,
@@ -41,13 +41,17 @@ System.register(["../util/util", "../shader/Shader", "../cpu/Thread", "../worker
                         xoffset: xoffset,
                         yoffset: yoffset,
                         tracer: this.tracer
-                    }, [pixelMemory.buffer]);
+                    });
                 }
                 RayJob.prototype.run = function () {
                     this.finished = false;
+                    if (this.thread.traced) {
+                        return;
+                    }
                     if (this.thread.initialized && !this.thread.isTracing) {
                         this.thread.trace();
-                        this.thread.sendData({ ar: this.display.getAR() });
+                        var buffer = new ArrayBuffer(this.pixelMemory.length);
+                        this.thread.sendData({ buffer: buffer, ar: this.display.getAR() }, [buffer]);
                     }
                     this.finished = true;
                 };

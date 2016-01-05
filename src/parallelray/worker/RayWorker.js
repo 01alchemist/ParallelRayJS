@@ -31,7 +31,6 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                         }
                         else if (self.command == RayWorker.INIT) {
                             self.command = null;
-                            self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
                             postMessage(RayWorker.INITED);
                             self.tracer = e.data.tracer;
                             self.tracer.scene.objects.forEach(function (obj) {
@@ -51,8 +50,15 @@ System.register(["../gfx/gfx", "../util/util", "../shader/Shader", "../util/math
                         else if (self.command == RayWorker.TRACE) {
                             self.command = null;
                             self.ar = e.data.ar;
+                            if (!self.pixelMemory) {
+                                self.pixelMemory = new Uint8Array(e.data.buffer);
+                            }
+                            else {
+                                self.pixelMemory.buffer = e.data.buffer;
+                            }
                             self.run();
                             postMessage(RayWorker.TRACED);
+                            postMessage(self.pixelMemory.buffer, [self.pixelMemory.buffer]);
                         }
                     }, false);
                 }

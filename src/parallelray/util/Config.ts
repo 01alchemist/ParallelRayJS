@@ -15,8 +15,8 @@ export class Config
 
 	static RES_ROOT:string = "./res/";
 
-	static window_width:number = 512;
-	static window_height:number = 512;
+	static window_width:number = 640;
+	static window_height:number = 360;
 	static display_scale:number = 1;
 	static recursion_max:number = 3;
 	static thread_amount:number = -1;

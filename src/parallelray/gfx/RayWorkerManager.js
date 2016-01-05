@@ -1,6 +1,6 @@
 System.register(["../util/Config", "./RayJob"], function(exports_1) {
     var Config_1, RayJob_1;
-    var RayWorkerManager;
+    var SharedArrayBuffer, RayWorkerManager;
     return {
         setters:[
             function (Config_1_1) {
@@ -10,6 +10,7 @@ System.register(["../util/Config", "./RayJob"], function(exports_1) {
                 RayJob_1 = RayJob_1_1;
             }],
         execute: function() {
+            exports_1("SharedArrayBuffer", SharedArrayBuffer = SharedArrayBuffer || ArrayBuffer);
             RayWorkerManager = (function () {
                 function RayWorkerManager(tracer) {
                     this.tracer = tracer;
@@ -17,7 +18,7 @@ System.register(["../util/Config", "./RayJob"], function(exports_1) {
                     var width = Config_1.Config.window_width;
                     var height = Config_1.Config.window_height;
                     this.propertyMemory = new Uint8Array(new SharedArrayBuffer(this.propertySize));
-                    this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 4));
+                    this.pixelMemory = new Uint8Array(new SharedArrayBuffer(width * height * 4));
                     this.jobs = [];
                     this.setWorkerAmount(Config_1.Config.thread_amount);
                 }
@@ -39,6 +40,7 @@ System.register(["../util/Config", "./RayJob"], function(exports_1) {
                     if (n <= 0) {
                         n = navigator["hardwareConcurrency"] || 2;
                     }
+                    n = -1;
                     n = n > 2 ? 2 : n;
                     console.info("hardwareConcurrency:" + n);
                     this.jobs = [];

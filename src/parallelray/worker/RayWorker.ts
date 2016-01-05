@@ -5,8 +5,7 @@ import {Plane} from "../util/math/Plane";
 import {Sphere} from "../util/math/Sphere";
 import {Camera} from "../gfx/Camera";
 
-export class RayWorker
-{
+export class RayWorker {
 
     static INIT:string = "INIT";
     static INITED:string = "INITED";
@@ -29,30 +28,30 @@ export class RayWorker
     private window_width:number;
     private window_height:number;
 
-    constructor(){
+    constructor() {
         var self = this;
         addEventListener('message', (e:any) => {
 
-            if(self.command == null){
+            if (self.command == null) {
                 self.command = e.data;
-            }else if(self.command == RayWorker.INIT){
+            } else if (self.command == RayWorker.INIT) {
 
                 self.command = null;
                 /*self.propertyMemory = new Uint8Array(e.data.propertyMemory);*/
-                self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
+                //self.pixelMemory = new Uint8Array(e.data.pixelMemory);
 
                 postMessage(RayWorker.INITED);
 
                 self.tracer = e.data.tracer;
 
-                self.tracer.scene.objects.forEach(function(obj:TracerObject){
-                    obj.primitives.forEach(function(primitive:Primitive, index:number){
-                        primitive = primitive.type == "plane"?Plane.cast(primitive):Sphere.cast(primitive);
+                self.tracer.scene.objects.forEach(function (obj:TracerObject) {
+                    obj.primitives.forEach(function (primitive:Primitive, index:number) {
+                        primitive = primitive.type == "plane" ? Plane.cast(primitive) : Sphere.cast(primitive);
                         obj.primitives[index] = primitive;
                     });
                 });
                 self.tracer.camera = Camera.cast(self.tracer.camera);
-                self.tracer.scene.lights.forEach(function(light:Light, index){
+                self.tracer.scene.lights.forEach(function (light:Light, index) {
                     self.tracer.scene.lights[index] = Light.cast(light);
                 });
 
@@ -66,16 +65,22 @@ export class RayWorker
                     e.data.id
                 );
 
-            }else if(self.command == RayWorker.TRACE){
+            } else if (self.command == RayWorker.TRACE) {
                 self.command = null;
                 self.ar = e.data.ar;
+                if(!self.pixelMemory){
+                    self.pixelMemory = new Uint8Array(e.data.buffer);
+                }else{
+                    self.pixelMemory.buffer = e.data.buffer;
+                }
                 self.run();
                 postMessage(RayWorker.TRACED);
+                postMessage(self.pixelMemory.buffer, [self.pixelMemory.buffer]);
             }
         }, false);
     }
-    init(width:number, height:number, xoffset:number, yoffset:number, id:number)
-    {
+
+    init(width:number, height:number, xoffset:number, yoffset:number, id:number) {
         this.width = width;
         this.height = height;
         this.xoffset = xoffset;
@@ -85,19 +90,15 @@ export class RayWorker
         //this.tracer = tracer;
     }
 
-    run():void
-    {
+    run():void {
         this.finished = false;
         //console.log("Traced");
-        if (this.tracer != null)
-        {
+        if (this.tracer != null) {
             var width:number = this.window_width;
             var height:number = this.window_height;
             var ray_primary:Ray = new Ray();
-            for (var y:number = this.yoffset; y < this.yoffset + this.height; y++)
-            {
-                for (var x:number = this.xoffset; x < this.xoffset + this.width; x++)
-                {
+            for (var y:number = this.yoffset; y < this.yoffset + this.height; y++) {
+                for (var x:number = this.xoffset; x < this.xoffset + this.width; x++) {
                     ray_primary = Ray.calcCameraRay(this.tracer.camera, width, height, this.ar, x, y);
 
                     this.drawPixelVec3f(x, y, RayWorker.traceColor(ray_primary, this.tracer.scene, 0));
@@ -111,7 +112,7 @@ export class RayWorker
         this.finished = true;
     }
 
-    drawPixelVec3f(x:number, y:number, color:Vec3f):void{
+    drawPixelVec3f(x:number, y:number, color:Vec3f):void {
 
         if (x < 0 || x > this.width || y < 0 || y > this.height)
             return;
@@ -148,8 +149,7 @@ export class RayWorker
         this.pixelMemory[index + 3] = 255;
     }
 
-    static traceColor(ray:Ray, scene:Scene, n:number):Vec3f
-    {
+    static traceColor(ray:Ray, scene:Scene, n:number):Vec3f {
         // Break out from the method if max recursion depth is hit
         if (n > Config.recursion_max)
             return Shader.COLOR_NULL;
@@ -161,11 +161,10 @@ export class RayWorker
         var tInit:number = Number.MAX_VALUE;
 
         // Find the nearest intersection point
-        scene.objects.forEach(function(obj:TracerObject){
-            obj.primitives.forEach(function(primitive:Primitive){
+        scene.objects.forEach(function (obj:TracerObject) {
+            obj.primitives.forEach(function (primitive:Primitive) {
                 xInit = primitive.intersect(ray);
-                if (xInit != null && xInit.getT() < tInit)
-                {
+                if (xInit != null && xInit.getT() < tInit) {
                     xFinal = xInit;
                     tInit = xFinal.getT();
                     xObject = obj;
@@ -181,14 +180,13 @@ export class RayWorker
         var cFinal:Vec3f = new Vec3f();
 
         // Shade the surface point against all lights in the scene
-        scene.lights.forEach(function(light:Light) {
+        scene.lights.forEach(function (light:Light) {
 
             cFinal.set(cFinal.add(Shader.main(ray, xFinal, light, xObject.material)));
 
             var ray_shadow:Ray = null;
 
-            if (xObject.material.reflectivity != 1.0)
-            {
+            if (xObject.material.reflectivity != 1.0) {
                 var L_Vector:Vec3f = light.pos.sub(xFinal.pos);
                 var L_length:number = L_Vector.length();
 
@@ -209,25 +207,21 @@ export class RayWorker
 
         });
 
-        if (xObject.material.reflectivity > 0.0)
-        {
+        if (xObject.material.reflectivity > 0.0) {
             var ray_reflected:Ray = new Ray(xFinal.getPos(), ray.getDir().reflect(xFinal.getNorm()));
             cFinal.set(cFinal.add(RayWorker.traceColor(ray_reflected, scene, n + 1).scale(xObject.material.reflectivity)));
         }
 
-        if (xObject.material.refractivity > 0.0)
-        {
+        if (xObject.material.refractivity > 0.0) {
             var ray_refracted:Ray;
             var N:Vec3f = xFinal.getNorm();
             var NdotI:number = ray.getDir().dot(N), ior, n1, n2, cos_t;
 
-            if (NdotI > 0.0)
-            {
+            if (NdotI > 0.0) {
                 n1 = ray.getIOR();
                 n2 = xObject.material.ior;
                 N = N.negate();
-            } else
-            {
+            } else {
                 n1 = xObject.material.ior;
                 n2 = ray.getIOR();
                 NdotI = -NdotI;
@@ -245,24 +239,21 @@ export class RayWorker
         return <Vec3f>MathUtils.clamp(cFinal, 0.0, 1.0);
     }
 
-    static traceShadow(ray:Ray, s:Scene, thisobj:TracerObject, L_length:number)
-    {
+    static traceShadow(ray:Ray, s:Scene, thisobj:TracerObject, L_length:number) {
         var xInit:Intersection = null;
         var xFinal:Intersection = null;
         var xObject:TracerObject = null;
         var tInit:number = Number.MAX_VALUE;
         var weight:number = 1.0;
 
-        s.objects.forEach(function(obj:TracerObject){
-            if (obj === thisobj)
-            {
+        s.objects.forEach(function (obj:TracerObject) {
+            if (obj === thisobj) {
                 return;
             }
 
-            obj.primitives.forEach(function(primitive:Primitive) {
+            obj.primitives.forEach(function (primitive:Primitive) {
                 xInit = primitive.intersect(ray);
-                if (xInit != null && xInit.getT() < tInit && xInit.getT() < L_length)
-                {
+                if (xInit != null && xInit.getT() < tInit && xInit.getT() < L_length) {
                     xFinal = xInit;
                     tInit = xFinal.getT();
                     xObject = obj;
@@ -285,33 +276,27 @@ export class RayWorker
         return weight;
     }
 
-    getWidth():number
-    {
+    getWidth():number {
         return this.width;
     }
 
-    getHeight():number
-    {
+    getHeight():number {
         return this.height;
     }
 
-    getXOffset():number
-    {
+    getXOffset():number {
         return this.xoffset;
     }
 
-    getYOffset():number
-    {
+    getYOffset():number {
         return this.yoffset;
     }
 
-    getId():number
-    {
+    getId():number {
         return this.id;
     }
 
-    isFinished():boolean
-    {
+    isFinished():boolean {
         return this.finished;
     }
 }

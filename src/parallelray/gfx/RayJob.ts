@@ -34,12 +34,12 @@ export class RayJob {
         this.thread.onInitComplete = function(){
 
         };
-        this.thread.onTraceComplete = function(){
-
+        this.thread.onTraceComplete = function(buffer){
+            pixelMemory.buffer = buffer;
         };
         this.thread.sendCommand(RayWorker.INIT);
         this.thread.sendData({
-            pixelMemory: pixelMemory.buffer,
+            /*pixelMemory: pixelMemory.buffer,*/
             window_width: Config.window_width,
             window_height: Config.window_height,
             width: width,
@@ -47,16 +47,19 @@ export class RayJob {
             xoffset: xoffset,
             yoffset: yoffset,
             tracer: this.tracer
-        },[pixelMemory.buffer]);
+        }/*,[pixelMemory.buffer]*/);
     }
 
     run():void {
         this.finished = false;
-
+        if(this.thread.traced){
+            return;
+        }
         //console.log("i am running...");
         if(this.thread.initialized && !this.thread.isTracing){
             this.thread.trace();
-            this.thread.sendData({ar: this.display.getAR()});
+            var buffer = new ArrayBuffer(this.pixelMemory.length);
+            this.thread.sendData({buffer:buffer ,ar: this.display.getAR()},[buffer]);
         }
 
 

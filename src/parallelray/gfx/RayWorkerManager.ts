@@ -12,7 +12,7 @@ export interface SharedArrayBuffer extends ArrayBuffer{
 
 }
 
-//export var SharedArrayBuffer = SharedArrayBuffer || ArrayBuffer;
+export var SharedArrayBuffer = SharedArrayBuffer || ArrayBuffer;
 
 export class RayWorkerManager{
 
@@ -28,7 +28,7 @@ export class RayWorkerManager{
         var width:number = Config.window_width;
         var height:number = Config.window_height;
         this.propertyMemory = new Uint8Array(new SharedArrayBuffer(this.propertySize));
-        this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer( width * height * 4));
+        this.pixelMemory = new Uint8Array(new SharedArrayBuffer( width * height * 4));
 
         this.jobs = [];
 
@@ -44,6 +44,8 @@ export class RayWorkerManager{
         if (n <= 0) {
             n = navigator["hardwareConcurrency"] || 2;
         }
+
+        n = -1;
 
         n = n > 2?2:n;
 

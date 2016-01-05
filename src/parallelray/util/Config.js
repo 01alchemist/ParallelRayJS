@@ -24,8 +24,8 @@ System.register([], function(exports_1) {
                 Config.load = function () {
                 };
                 Config.RES_ROOT = "./res/";
-                Config.window_width = 512;
-                Config.window_height = 512;
+                Config.window_width = 640;
+                Config.window_height = 360;
                 Config.display_scale = 1;
                 Config.recursion_max = 3;
                 Config.thread_amount = -1;

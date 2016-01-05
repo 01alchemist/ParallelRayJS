@@ -51,7 +51,7 @@ export class Display {
         this.info = document.getElementById("info");
         this.canvas = document.getElementById("viewport");
         this.ctx = this.canvas.getContext("2d");
-        this.ctx.putImageData(this.image,0,0);
+        this.ctx.putImageData(this.image, 0, 0);
 
         // Create a buffer strategy using triplebuffering
         if (this.bufferstrategy == null) {
@@ -61,11 +61,30 @@ export class Display {
     }
 
     public render(_pixels):void {
-        this.image = new ImageData(this.width, this.height);
-        this.image.data.buffer = _pixels.buffer;
-        this.ctx.putImageData(this.image,0,0);
-        this.ctx.fillStyle = 'rgba(255,0.9411764705882353,0.0588235294117647,1)';
-        this.ctx.fillRect(Math.random() * 100,Math.random() * 100,50,50);
+        //this.image.data.buffer = _pixels.buffer;
+
+        for (var x = 0; x < this.width; x++) {
+            for (var y = 0; y < this.height; y++) {
+                var index:number = ((y * (this.width * 4)) + (x * 4));
+                this.image.data[index] = _pixels[index];
+                this.image.data[index+1] = _pixels[index+1];
+                this.image.data[index+2] = _pixels[index+2];
+                this.image.data[index+3] = _pixels[index+3];
+
+                /*this.image.data[index] = 255;
+                this.image.data[index+1] = 0;
+                this.image.data[index+2] = 0;
+                this.image.data[index+3] = 255;*/
+            }
+        }
+
+        this.ctx.putImageData(this.image, 0, 0);
+        //var i = 4 * 100;
+        //var rgba = _pixels[i] + "," + _pixels[i + 1] + "," + _pixels[i + 2] + "," + _pixels[i + 3];
+        //var rgba = "255,0,0,255";
+        //this.ctx.fillStyle = 'rgba(' + rgba + ')';
+        //this.ctx.fillStyle = "#FF0000";
+        this.ctx.fillRect(Math.random() * 100, Math.random() * 100, 10, 10);
     }
 
     clear() {

@@ -10,7 +10,9 @@ export class Thread{
     onInitComplete:Function;
 
     initialized:boolean;
+    traced:boolean;
     isTracing:boolean;
+    command:string;
 
     constructor(name:string){
         this.instance = new Worker("WorkerBootstrap.js");
@@ -26,11 +28,18 @@ export class Thread{
                 }
             }
             if(event.data == RayWorker.TRACED){
-                self.isTracing = false;
-                if(self.onTraceComplete){
-                    self.onTraceComplete();
+                self.command = RayWorker.TRACED;
+            }else{
+                if(self.command == RayWorker.TRACED){
+                    self.command = null;
+                    self.isTracing = false;
+                    self.traced = true;
+                    if(self.onTraceComplete){
+                        self.onTraceComplete(event.data);
+                    }
                 }
             }
+
         }
     }
     trace():void {

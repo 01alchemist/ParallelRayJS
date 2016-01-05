@@ -20,9 +20,16 @@ System.register(["../worker/RayWorker"], function(exports_1) {
                             }
                         }
                         if (event.data == RayWorker_1.RayWorker.TRACED) {
-                            self.isTracing = false;
-                            if (self.onTraceComplete) {
-                                self.onTraceComplete();
+                            self.command = RayWorker_1.RayWorker.TRACED;
+                        }
+                        else {
+                            if (self.command == RayWorker_1.RayWorker.TRACED) {
+                                self.command = null;
+                                self.isTracing = false;
+                                self.traced = true;
+                                if (self.onTraceComplete) {
+                                    self.onTraceComplete(event.data);
+                                }
                             }
                         }
                     };
